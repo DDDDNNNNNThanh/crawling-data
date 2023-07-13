@@ -10,7 +10,7 @@ class AlonhadatSpider(scrapy.Spider):
 
     def start_requests(self):
         pages = []
-        for i in range(1,10):
+        for i in range(1,50):
             domain = 'https://alonhadat.com.vn/nha-dat/can-ban/trang--{}.html'.format(i)
             pages.append(domain)
 
@@ -18,7 +18,7 @@ class AlonhadatSpider(scrapy.Spider):
             yield scrapy.Request(url=page, callback=self.parse_link)
 
     def parse_link(self, response):
-        for i in range(1, 21):
+        for i in range(1, 31):
             str = '#left > div.content-items > div:nth-child({}) > div:nth-child(1) > div.ct_title > a::attr(href)'.format(i)
             link = response.css(str).extract_first()
             link = 'https://alonhadat.com.vn/' + link
