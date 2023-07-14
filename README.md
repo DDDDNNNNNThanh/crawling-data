@@ -19,10 +19,33 @@ It uses the Scrapy framework for web scraping. Here's a brief description of the
 * alonhadat.py: This spider is responsible for crawling the data from the "alonhadat.com.vn" website. It starts by sending requests to multiple pages and then extracts the links to individual property listings. It further parses each property page to extract relevant information using CSS selectors. The extracted data is stored in the defined item structure and yielded as results.
 
 We will be provided with two CSV files containing housing data:
-- 'can ban.csv': This file contains data about houses available for sale.
-- 'Cho thue.csv': This file contains data about houses available for rent.
+- 'can_ban.csv': This file contains data about houses available for sale.
+- 'cho_thue.csv': This file contains data about houses available for rent.
+
+For the "can_ban.csv" and "cho_thue.csv" files, the headers (columns) will be as follows:
+
+- area
+- address
+- description
+- floor_number
+- bedroom_number
+- is_dinning_room
+- is_kitchen
+- is_terrace
+- is_car_pack
+- is_owner
+- start_date
+- end_date
+- type
+- direction
+- street_in_front_of_house
+- width
+- height
+- law
+- price
+
   
-# Run project
+# Command to run project in terminal:
 ```bash
 scrapy runspider alonhadat.py
 ```
