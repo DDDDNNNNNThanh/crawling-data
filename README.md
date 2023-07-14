@@ -47,6 +47,7 @@ For the "can_ban.csv" and "cho_thue.csv" files, the headers (columns) will be as
   
 # Command to run project in terminal:
 ```bash
-scrapy runspider alonhadat.py
+scrapy crawl alonhadat -t csv -o cho_thue.csv -a category=chothue --set FEED_EXPORT_ENCODING=utf-8
+scrapy crawl alonhadat -t csv -o can_ban.csv -a category=canban --set FEED_EXPORT_ENCODING=utf-8
 ```
 
