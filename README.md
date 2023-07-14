@@ -17,9 +17,13 @@ It uses the Scrapy framework for web scraping. Here's a brief description of the
 * spiders folder: This folder contains the spiders, which define how to extract data from websites.
 
 * alonhadat.py: This spider is responsible for crawling the data from the "alonhadat.com.vn" website. It starts by sending requests to multiple pages and then extracts the links to individual property listings. It further parses each property page to extract relevant information using CSS selectors. The extracted data is stored in the defined item structure and yielded as results.
+
+We will be provided with two CSV files containing housing data:
+- 'can ban.csv': This file contains data about houses available for sale.
+- 'Cho thue.csv': This file contains data about houses available for rent.
   
 # Run project
 ```bash
-scrapy crawl alonhadat -o ../data/output.csv --set FEED_EXPORT_ENCODING=utf-8
+scrapy runspider alonhadat.py
 ```
 
