@@ -1,7 +1,29 @@
+# -*- coding: utf-8 -*-
 import scrapy
-from data_price.items import DataPriceItem
 from datetime import date, timedelta
 from bs4 import BeautifulSoup
+import csv
+
+class DataPriceItem(scrapy.Item):
+    area = scrapy.Field()
+    address = scrapy.Field()
+    description = scrapy.Field()
+    floor_number = scrapy.Field()
+    bedroom_number = scrapy.Field()
+    is_dinning_room = scrapy.Field()
+    is_kitchen = scrapy.Field()
+    is_terrace = scrapy.Field()
+    is_car_pack = scrapy.Field()
+    is_owner = scrapy.Field()
+    start_date = scrapy.Field()
+    end_date = scrapy.Field()
+    type = scrapy.Field()
+    direction = scrapy.Field()
+    street_in_front_of_house = scrapy.Field()
+    width = scrapy.Field()
+    height = scrapy.Field()
+    law = scrapy.Field()
+    price = scrapy.Field()
 
 class AlonhadatSpider(scrapy.Spider):
     name = 'alonhadat'
@@ -10,25 +32,25 @@ class AlonhadatSpider(scrapy.Spider):
 
     def start_requests(self):
         pages = []
-        for i in range(1,50):
-            domain = 'https://alonhadat.com.vn/nha-dat/can-ban/trang--{}.html'.format(i)
-            pages.append(domain)
+        for i in range(1, 10):
+            domain_chothue = 'https://alonhadat.com.vn/nha-dat/cho-thue/trang--{}.html'.format(i)
+            domain_canban = 'https://alonhadat.com.vn/nha-dat/can-ban/trang--{}.html'.format(i)
+            pages.append(domain_chothue)
+            pages.append(domain_canban)
 
         for page in pages:
             yield scrapy.Request(url=page, callback=self.parse_link)
 
     def parse_link(self, response):
-        for i in range(1, 31):
-            str = '#left > div.content-items > div:nth-child({}) > div:nth-child(1) > div.ct_title > a::attr(href)'.format(i)
-            link = response.css(str).extract_first()
+        for i in range(1, 21):
+            link_selector = '#left > div.content-items > div:nth-child({}) > div:nth-child(1) > div.ct_title > a::attr(href)'.format(i)
+            link = response.css(link_selector).extract_first()
             link = 'https://alonhadat.com.vn/' + link
-
             yield scrapy.Request(url=link, callback=self.parse)
 
     def parse(self, response, **kwargs):
         item = DataPriceItem()
         item['price'] = self.extract(response, '#left > div.property > div.moreinfor > span.price > span.value')
-
         item['description'] = self.extract(response, '#left > div.property > div.detail.text-content')
         item['address'] = self.extract(response, '#left > div.property > div.address > span.value')
         item['area'] = self.extract(response, '#left > div.property > div.moreinfor > span.square > span.value')
@@ -50,15 +72,21 @@ class AlonhadatSpider(scrapy.Spider):
         item['height'] = result_table[11]
         item['law'] = result_table[12]
 
-        yield item
+        if 'cho-thue' in response.url:
+            with open('cho_thue.csv', 'a', newline='', encoding='utf-8') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=item.fields.keys())
+                writer.writerow(item)
 
+        elif 'can-ban' in response.url:
+            with open('can_ban.csv', 'a', newline='', encoding='utf-8') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=item.fields.keys())
+                writer.writerow(item)
 
     def extract(self, response, query, para=None):
         query += "::text"
         model = response.css(query).extract_first()
 
         if model is not None:
-            # start_date and end_date, convert string => now datetime
             if para == 'start_date' or para == 'end_date':
                 now = date.today().strftime("%d/%m/%Y")
                 pre = (date.today() - timedelta(1)).strftime("%d/%m/%Y")
@@ -71,7 +99,6 @@ class AlonhadatSpider(scrapy.Spider):
         result = soup.findAll('td')
 
         floor_number = result[21].text
-
         bedroom_number = result[27].text
 
         is_dinning_room = result[5].text
