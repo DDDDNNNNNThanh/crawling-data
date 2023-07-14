@@ -35,20 +35,20 @@ class AlonhadatSpider(scrapy.Spider):
         for i in range(1, 10):
             domain_chothue = 'https://alonhadat.com.vn/nha-dat/cho-thue/trang--{}.html'.format(i)
             domain_canban = 'https://alonhadat.com.vn/nha-dat/can-ban/trang--{}.html'.format(i)
-            pages.append(domain_chothue)
-            pages.append(domain_canban)
+            pages.append((domain_chothue, 'chothue'))
+            pages.append((domain_canban, 'canban'))
 
-        for page in pages:
-            yield scrapy.Request(url=page, callback=self.parse_link)
+        for page, category in pages:
+            yield scrapy.Request(url=page, callback=self.parse_link, meta={'category': category})
 
     def parse_link(self, response):
         for i in range(1, 21):
             link_selector = '#left > div.content-items > div:nth-child({}) > div:nth-child(1) > div.ct_title > a::attr(href)'.format(i)
             link = response.css(link_selector).extract_first()
             link = 'https://alonhadat.com.vn/' + link
-            yield scrapy.Request(url=link, callback=self.parse)
+            yield scrapy.Request(url=link, callback=self.parse, meta={'category': response.meta['category']})
 
-    def parse(self, response, **kwargs):
+    def parse(self, response):
         item = DataPriceItem()
         item['price'] = self.extract(response, '#left > div.property > div.moreinfor > span.price > span.value')
         item['description'] = self.extract(response, '#left > div.property > div.detail.text-content')
@@ -72,12 +72,11 @@ class AlonhadatSpider(scrapy.Spider):
         item['height'] = result_table[11]
         item['law'] = result_table[12]
 
-        if 'cho-thue' in response.url:
+        if response.meta['category'] == 'chothue':
             with open('cho_thue.csv', 'a', newline='', encoding='utf-8') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=item.fields.keys())
                 writer.writerow(item)
-
-        elif 'can-ban' in response.url:
+        elif response.meta['category'] == 'canban':
             with open('can_ban.csv', 'a', newline='', encoding='utf-8') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=item.fields.keys())
                 writer.writerow(item)
